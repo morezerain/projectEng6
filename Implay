@@ -1,0 +1,15 @@
+function y = implay(varargin) 
+nargs = nargin;
+names = cell(1, nargs);
+for indx = 1:nargs
+    names{indx} = inputname(indx);
+end
+
+hScopeCfg = iptscopes.IMPlayScopeCfg(varargin, ...
+    uiservices.cacheFcnArgNames(names));
+
+obj = uiscopes.new(hScopeCfg);
+
+if nargout > 0
+    y = obj;
+end
