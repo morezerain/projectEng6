@@ -1,0 +1,13 @@
+function hSlider_Callback(hObject, eventdata, handles)
+%% Callback: Time-slider
+
+	global ud;
+
+	if isempty( ud.gVideo )
+		return;
+	end;
+	
+	cFrm = get( ud.handles.hSlider, 'Value' );
+	ud.glbFrm = round(cFrm);
+	
+	ret = OnDraw;
