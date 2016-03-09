@@ -11,3 +11,32 @@ function hSlider_Callback(hObject, eventdata, handles)
 	ud.glbFrm = round(cFrm);
 	
 	ret = OnDraw;
+
+
+function ret = OnDraw
+%% Updating UI Main function
+
+	global ud;
+
+	set( gcf, 'CurrentAxes', ud.handles.hVideo ); cla; 
+	if ~isempty(ud.gVideo)
+
+		curTime = (ud.glbFrm) * (1/ud.gVideo.FrameRate);
+		try 
+			ud.gVideo.CurrentTime = curTime;
+		catch
+			fprintf('End of the frame\n');
+			ret = 0;
+			return;
+		end;
+
+		vidFrm = readFrame( ud.gVideo );
+		set( gcf, 'CurrentAxes', ud.handles.hVideo );
+		imagesc( vidFrm );
+		axis image;
+	end;
+
+	% GUI update
+	SetMainWnd;
+
+	ret = 1;
