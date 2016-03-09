@@ -1,28 +1,7 @@
 function varargout = Video_GUI(varargin)
-% VIDEO_GUI MATLAB code for Video_GUI.fig
-%      VIDEO_GUI, by itself, creates a new VIDEO_GUI or raises the existing
-%      singleton*.
-%
-%      H = VIDEO_GUI returns the handle to a new VIDEO_GUI or the handle to
-%      the existing singleton*.
-%
-%      VIDEO_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in VIDEO_GUI.M with the given input arguments.
-%
-%      VIDEO_GUI('Property','Value',...) creates a new VIDEO_GUI or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before Video_GUI_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to Video_GUI_OpeningFcn via varargin.
-%
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
-%
-% See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help Video_GUI
 
-% Last Modified by GUIDE v2.5 02-Mar-2016 10:46:22
+% Last Modified by GUIDE v2.5 08-Mar-2016 20:29:53
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -59,11 +38,8 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 
-% UIWAIT makes Video_GUI wait for user response (see UIRESUME)
-% uiwait(handles.Slider);
 
 
-% --- Outputs from this function are returned to the command line.
 function varargout = Video_GUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
@@ -73,23 +49,10 @@ function varargout = Video_GUI_OutputFcn(hObject, eventdata, handles)
 varargout{1} = handles.output;
 
 
-% --- Executes on slider movement.
 function vidSlider_Callback(hObject, eventdata, handles)
-% hObject    handle to vidSlider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-
-
-% --- Executes during object creation, after setting all properties.
 function vidSlider_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to vidSlider (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: slider controls usually have a light gray background.
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
@@ -97,9 +60,7 @@ end
 
 % --- Executes on button press in Rewind.
 function Rewind_Callback(hObject, eventdata, handles)
-% hObject    handle to Rewind (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+
 i = handles.i
 rewind = i - 10;
 handles.i = rewind;
@@ -111,9 +72,6 @@ guidata(hObject,handles);
 
 % --- Executes on button press in Play.
 function Play_Callback(hObject, eventdata, handles)
-% hObject    handle to Play (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 button_state = get(hObject,'Value'); 
 if button_state == get(hObject,'Max')
       display('up')
@@ -152,86 +110,47 @@ videoObject = handles.videoObject;
 
 % --- Executes on button press in Forward.
 function Forward_Callback(hObject, eventdata, handles)
-% hObject    handle to Forward (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in Load.
-function Load_Callback(hObject, eventdata, handles)
-% hObject    handle to Load (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-Message = {'Please select a video:'};
-mchoices = {'Video1' 'Video2' 'Video3' };
-selection = menu(Message, mchoices);%Opens up Menu that allows user to select Video
+% --- Executes on button press in load.
 
 %If statement that determines what video to load
-if selection == 1
-    %Load Video 1
-    videoObject = VideoReader('big_buck_bunny_480p_1mb.mp4');
-   
-    vidWidth = videoObject.Width;
-    vidHeight = videoObject.Height;
+function load_Callback(hObject, eventdata, handles)
+%-------------------browse and select video-------------------
+[video_name, video_path] = uigetfile('*.mp4',...
+    'select a video');
+%fopen(fullfile(video_path,video_name) )
+%if (video_name==0)&(video_path==0)
+%expression what if the user didnt select any thing
+%end
+%--------------------For grabing video info----------------
+handles =guidata(hObject);
+videoObject = VideoReader(strcat(video_path,video_name));
+global vidHeight vidWidth framerate
+vidHeight = videoObject.Height;
+vidWidth = videoObject.Width;
+framerate = videoObject.FrameRate;
+duration = sec2hms(videoObject.Duration);
+formatVideoData = ['Files:%s\n' ...
+    'Resolustions:%d X %d \n'...
+    'Framerate:%d\n'...
+    'Total duration:%s\n'];
+strinformation = sprintf(formatVideoData,video_name,vidWidth,vidHeight,framerate,duration);
+set(handles.text2,'String',strinformation);
     
-    mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
-        'colormap',[]);
-    k=1;
-    while hasFrame(videoObject)
-        mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
-       k = k+1;
-    end
-    
-    handles.mov = mov;
-    handles.videoObject = videoObject;
-    handles.i= 1;
-    guidata(hObject,handles)
-   
-   
-%load Video 2   
-elseif selection ==2;
-    
-    videoObject = VideoReader('big_buck_bunny_720p_1mb.mp4'); 
-    
-    vidWidth = videoObject.Width;
-    vidHeight = videoObject.Height;
-    
-    mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
-        'colormap',[]);
-    k=1;
-    while hasFrame(videoObject)
-        mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
-       k = k+1;
-    end
-    
-    handles.mov = mov;
-    handles.videoObject = videoObject;
-    handles.i= 1;
-    guidata(hObject,handles)
-   
-   
-else 
-    %Load video3
-     videoObject = VideoReader('big_buck_bunny_720p_2mb.mp4');
-     vidWidth = videoObject.Width;
-    vidHeight = videoObject.Height;
-    
-    mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
-        'colormap',[]);
-    k=1;
-    while hasFrame(videoObject)
-        mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
-       k = k+1;
-    end
-    
-    handles.mov = mov;
-    handles.videoObject = videoObject;
-    handles.i= 1;
-    guidata(hObject,handles)
-   
+mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
+    'colormap',[]);
+k=1;
+while hasFrame(videoObject)
+    mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
+    k = k+1;
 end
-
-
+    handles.mov = mov;
+    handles.videoObject = videoObject;
+    handles.i= 1;
+    guidata(hObject,handles)
+   
+  
 
 % --- Executes on button press in Histogram.
 function Histogram_Callback(hObject, eventdata, handles)
@@ -292,23 +211,17 @@ else
     cla(Axes3)
 end
 
- 
-
-
-
-
-
 
 guidata(hObject,handles)
 
 
 
-
-    
-
-
 % --- Executes on button press in Mute.
 function Mute_Callback(hObject, eventdata, handles)
-% hObject    handle to Mute (see GCBO)
+
+
+% --- Executes during object creation, after setting all properties.
+function text2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% handles    empty - handles not created until after all CreateFcns called
