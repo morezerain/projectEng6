@@ -22,7 +22,6 @@ else
 end
 % End initialization code - DO NOT EDIT
 
-
 % --- Executes just before Video_GUI is made visible.
 function Video_GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
@@ -37,9 +36,6 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
-
-
-
 function varargout = Video_GUI_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
@@ -47,7 +43,6 @@ function varargout = Video_GUI_OutputFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
 
 function vidSlider_Callback(hObject, eventdata, handles)
 
@@ -57,7 +52,6 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-
 % --- Executes on button press in Rewind.
 function Rewind_Callback(hObject, eventdata, handles)
 
@@ -65,18 +59,14 @@ i = handles.i
 rewind = i - 10;
 handles.i = rewind;
 guidata(hObject,handles);
- 
-
-
-
 
 % --- Executes on button press in Play.
 function Play_Callback(hObject, eventdata, handles)
 button_state = get(hObject,'Value'); 
 if button_state == get(hObject,'Max')
-      display('up')
+      set(handles.Play,'String','Play')
  elseif button_state == get(hObject,'Min')
-      display('down')
+      set(handles.Play,'String','Pause')
  end
 vidStruct = handles.mov;
 videoObject = handles.videoObject;
@@ -106,13 +96,9 @@ videoObject = handles.videoObject;
  
        
    guidata(hObject,handles);
- 
 
 % --- Executes on button press in Forward.
 function Forward_Callback(hObject, eventdata, handles)
-
-
-% --- Executes on button press in load.
 
 %If statement that determines what video to load
 function load_Callback(hObject, eventdata, handles)
@@ -149,8 +135,6 @@ end
     handles.videoObject = videoObject;
     handles.i= 1;
     guidata(hObject,handles)
-   
-  
 
 % --- Executes on button press in Histogram.
 function Histogram_Callback(hObject, eventdata, handles)
@@ -214,14 +198,8 @@ end
 
 guidata(hObject,handles)
 
-
-
 % --- Executes on button press in Mute.
 function Mute_Callback(hObject, eventdata, handles)
 
-
 % --- Executes during object creation, after setting all properties.
 function text2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to text2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
