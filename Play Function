@@ -1,0 +1,34 @@
+function Play_Callback(hObject, eventdata, handles)
+button_state = get(hObject,'Value'); 
+if button_state == get(hObject,'Max')
+      set(handles.Play,'String','Pause')
+ elseif button_state == get(hObject,'Min')
+      set(handles.Play,'String','Play')
+end
+vidStruct = handles.mov;
+videoObject = handles.videoObject;
+ currAxes = handles.axes2;
+ Frames = vidStruct.cdata;%Extract Frames
+ handles.Frames = Frames;
+   l=length(Frames);
+   handles.l = l;
+         %Plays the video using for loop and image function
+ if button_state == get(hObject,'Max')   
+         for i=handles.i:handles.l
+             if button_state == 1 
+                image(vidStruct(i).cdata,'Parent', currAxes);
+                currAxes.Visible = 'off';
+                pause(1/videoObject.FrameRate);
+                handles.i = i;
+                button_state = get(hObject,'Value');
+             else
+                 handles.i = i;
+                 break
+             end
+         end
+ end
+ 
+     
+ 
+       
+   guidata(hObject,handles);
