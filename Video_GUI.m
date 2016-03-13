@@ -22,7 +22,7 @@ function varargout = Video_GUI(varargin)
 
 % Edit the above text to modify the response to help Video_GUI
 
-% Last Modified by GUIDE v2.5 12-Mar-2016 16:13:57
+% Last Modified by GUIDE v2.5 12-Mar-2016 17:14:02
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -132,45 +132,39 @@ guidata(hObject,handles);
 
 % --- Executes on button press in Play.
 function Play_Callback(hObject, eventdata, handles)
-% hObject    handle to Play (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handles.button_state = get(hObject,'Value');
-if handles.button_state == get(hObject,'Max')
-      display('up')
- elseif handles.button_state == get(hObject,'Min')
-      display('down')
- end
+button_state = get(hObject,'Value'); 
+if button_state == get(hObject,'Max')
+      set(handles.Play,'String','Pause')
+ elseif button_state == get(hObject,'Min')
+      set(handles.Play,'String','Play')
+end
 vidStruct = handles.mov;
-[m,n]=size(vidStruct);
 videoObject = handles.videoObject;
  currAxes = handles.axes2;
  Frames = vidStruct.cdata;%Extract Frames
  handles.Frames = Frames;
-   handles.l = n;
-   handles.state =1;
+   l=length(Frames);
+   handles.l = l;
          %Plays the video using for loop and image function
- if handles.button_state == get(hObject,'Max')   
-     for i=handles.i:handles.l
-             if handles.button_state == 1  
+ if button_state == get(hObject,'Max')   
+         for i=handles.i:handles.l
+             if button_state == 1 
                 image(vidStruct(i).cdata,'Parent', currAxes);
                 currAxes.Visible = 'off';
                 pause(1/videoObject.FrameRate);
-                handles.button_state = get(hObject,'Value');
-                handles.i =i;
-              
+                handles.i = i;
+                button_state = get(hObject,'Value');
              else
                  handles.i = i;
                  break
              end
          end
  end
-
+ 
      
  
        
    guidata(hObject,handles);
- 
 
 % --- Executes on button press in Forward.
 function Forward_Callback(hObject, eventdata, handles)
@@ -197,74 +191,42 @@ end
 guidata(hObject,handles);
 
 % --- Executes on button press in Load.
-function Load_Callback(hObject, eventdata, handles)
-% hObject    handle to Load (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-Message = {'Please select a video:'};
-mchoices = {'Video1' 'Video2' 'Video3' };
-selection = menu(Message, mchoices);%Opens up Menu that allows user to select Video
+function load_Callback(hObject, eventdata, handles)
+%-------------------browse and select video-------------------
+[video_name, video_path] = uigetfile('*.mp4',...
+    'select a video');
 
-%If statement that determines what video to load
-if selection == 1
-    %Load Video 1
-    videoObject = VideoReader('big_buck_bunny_480p_1mb.mp4');
-   
-    vidWidth = videoObject.Width;
-    vidHeight = videoObject.Height;
+%---------error message if sth wrong in readingvideo--------------
+%if 
+%uiwait(msgbox('Cannot open the file','Sorry','error'));
+%--------------------For grabing video info----------------
+global Videoload vidHeight vidWidth framerate 
+Videoload = strcat(video_path,video_name);
+handles =guidata(hObject);
+videoObject = VideoReader(Videoload);
+vidHeight = videoObject.Height;
+vidWidth = videoObject.Width;
+framerate = videoObject.FrameRate;
+duration = sec2hms(videoObject.Duration);
+formatVideoData = ['Files:%s\n' ...
+    'Resolustions:%d X %d \n'...
+    'Framerate:%d\n'...
+    'Total duration:%s\n'];
+strinformation = sprintf(formatVideoData,video_name,vidWidth,vidHeight,framerate,duration);
+set(handles.text2,'String',strinformation);
     
-    mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
-        'colormap',[]);
-    k=1;
-    while hasFrame(videoObject)
-        mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
-       k = k+1;
-    end
-
-%load Video 2   
-elseif selection ==2;
-    
-    videoObject = VideoReader('big_buck_bunny_720p_1mb.mp4'); 
-    
-    vidWidth = videoObject.Width;
-    vidHeight = videoObject.Height;
-    
-    mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
-        'colormap',[]);
-    k=1;
-    while hasFrame(videoObject)
-        mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
-       k = k+1;
-    end
-    
- 
-   
-else 
-    %Load video3
-     videoObject = VideoReader('big_buck_bunny_720p_2mb.mp4')
-     vidWidth = videoObject.Width;
-    vidHeight = videoObject.Height;
-    
-    mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
-        'colormap',[]);
-    k=1;
-    while hasFrame(videoObject)
-        mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
-       k = k+1;
-    end
-    
-    
-    
-   
-   
+mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
+    'colormap',[]);
+k=1;
+while hasFrame(videoObject)
+    mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
+    k = k+1;
 end
-
-
-
-
-
-
-%-------Load the RGB Values------------%
+    handles.mov = mov;
+    handles.videoObject = videoObject;
+    handles.i= 1;
+    guidata(hObject,handles)
+    %-------Load the RGB Values------------%
 handles.mov = mov;
 vidStruct = handles.mov;
 [m,n]=size(vidStruct);
@@ -295,22 +257,21 @@ end
 
 
 %------Load The music player--------%
-[y, fs] = audioread('Song.wav');
+[y, fs] = audioread(Videoload);
 p = audioplayer(y, fs);
 
-%------Load Music 2----------%
-[y2, fs] = audioread('Song.wav');
-y2 = flipud(y2);
-player = audioplayer(y2, fs);
-%------Load The music player--------%
-[y, fs] = audioread('Song.wav');
+[y2, fs] = audioread(Videoload);
+y2=flipud(y2);
+player=audioplayer(y2, fs);
+
+[y, fs] = audioread(Videoload);
 player3 = audioplayer(y, fs*3);
 
 
 %-------Handle Variables-------%
 handles.player = p;
-handles.player2 = player;
-handles.player3 = player3;
+handles.player2=player;
+handles.player3=player3;
 handles.yRed = yRed;
 handles.yGreen = yGreen;
 handles.yBlue = yBlue;
@@ -319,8 +280,7 @@ handles.i= 1;
 handles.mov = mov;
 handles.videoObject = videoObject;
     
-     guidata(hObject,handles)
-
+guidata(hObject,handles)
 
 
 % --- Executes on button press in Histogram.
@@ -369,12 +329,13 @@ handles.i = 1;
 
 guidata(hObject,handles);
 
-
-% --- Executes on button press in Music.
-function Music_Callback(hObject, eventdata, handles)
-% hObject    handle to Music (see GCBO)
+% --- Executes on button press in music.
+function music_Callback(hObject, eventdata, handles)
+% hObject    handle to music (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of music
 button_sound = get(hObject,'Value');
 p = handles.player;
 if button_sound == get(hObject,'Max')
@@ -394,11 +355,13 @@ end
 guidata(hObject,handles);
 
 
-% --- Executes on button press in music_2.
-function music_2_Callback(hObject, eventdata, handles)
-% hObject    handle to music_2 (see GCBO)
+% --- Executes on button press in togglebutton2.
+function togglebutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton2
 button_sound = get(hObject,'Value');
 p = handles.player2;
 if button_sound == get(hObject,'Max')
@@ -415,12 +378,9 @@ else
 end
 guidata(hObject,handles)
 
-% Hint: get(hObject,'Value') returns toggle state of music_2
-
-
-% --- Executes on button press in Music_3.
-function Music_3_Callback(hObject, eventdata, handles)
-% hObject    handle to Music_3 (see GCBO)
+% --- Executes on button press in togglebutton3.
+function togglebutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 button_sound = get(hObject,'Value');
@@ -438,4 +398,4 @@ else
 
 end
 guidata(hObject,handles)
-% Hint: get(hObject,'Value') returns toggle state of Music_3
+% Hint: get(hObject,'Value') returns toggle state of togglebutton3
