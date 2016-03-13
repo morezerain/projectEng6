@@ -22,7 +22,7 @@ function varargout = Video_GUI(varargin)
 
 % Edit the above text to modify the response to help Video_GUI
 
-% Last Modified by GUIDE v2.5 12-Mar-2016 13:35:27
+% Last Modified by GUIDE v2.5 12-Mar-2016 16:13:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -149,10 +149,8 @@ videoObject = handles.videoObject;
  handles.Frames = Frames;
    handles.l = n;
    handles.state =1;
-   
          %Plays the video using for loop and image function
  if handles.button_state == get(hObject,'Max')   
-     
      for i=handles.i:handles.l
              if handles.button_state == 1  
                 image(vidStruct(i).cdata,'Parent', currAxes);
@@ -298,11 +296,21 @@ end
 
 %------Load The music player--------%
 [y, fs] = audioread('Song.wav');
-
 p = audioplayer(y, fs);
+
+%------Load Music 2----------%
+[y2, fs] = audioread('Song.wav');
+y2 = flipud(y2);
+player = audioplayer(y2, fs);
+%------Load The music player--------%
+[y, fs] = audioread('Song.wav');
+player3 = audioplayer(y, fs*3);
+
 
 %-------Handle Variables-------%
 handles.player = p;
+handles.player2 = player;
+handles.player3 = player3;
 handles.yRed = yRed;
 handles.yGreen = yGreen;
 handles.yBlue = yBlue;
@@ -331,7 +339,7 @@ for w = handles.i:handles.len
  hold on
  plot(x,yGreen(:,w),'g','Parent', Axes)
  plot(x,yBlue(:,w),'b','Parent', Axes)
- pause(1/videoObject.FrameRate)
+ pause(.005)
  cla(Axes)
 end
 
@@ -368,7 +376,7 @@ function Music_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 button_sound = get(hObject,'Value');
-p = handles.player
+p = handles.player;
 if button_sound == get(hObject,'Max')
       display('up')
  elseif button_sound == get(hObject,'Min')
@@ -376,7 +384,6 @@ if button_sound == get(hObject,'Max')
 end
 if button_sound == 1;
     play(p)
-    disp(p)
 else
     pause(p)
 
@@ -385,3 +392,50 @@ end
 
 
 guidata(hObject,handles);
+
+
+% --- Executes on button press in music_2.
+function music_2_Callback(hObject, eventdata, handles)
+% hObject    handle to music_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+button_sound = get(hObject,'Value');
+p = handles.player2;
+if button_sound == get(hObject,'Max')
+      display('up')
+ elseif button_sound == get(hObject,'Min')
+      display('down')
+end
+if button_sound == 1;
+    play(p)
+else
+    pause(p)
+
+
+end
+guidata(hObject,handles)
+
+% Hint: get(hObject,'Value') returns toggle state of music_2
+
+
+% --- Executes on button press in Music_3.
+function Music_3_Callback(hObject, eventdata, handles)
+% hObject    handle to Music_3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+button_sound = get(hObject,'Value');
+p = handles.player3;
+if button_sound == get(hObject,'Max')
+      display('up')
+ elseif button_sound == get(hObject,'Min')
+      display('down')
+end
+if button_sound == 1;
+    play(p)
+else
+    pause(p)
+
+
+end
+guidata(hObject,handles)
+% Hint: get(hObject,'Value') returns toggle state of Music_3
