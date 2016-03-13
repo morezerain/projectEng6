@@ -1,0 +1,81 @@
+function load_Callback(hObject, eventdata, handles)
+%-------------------browse and select video-------------------
+[video_name, video_path] = uigetfile('*.mp4',...
+    'select a video');
+
+%---------error message if sth wrong in readingvideo--------------
+%if 
+%uiwait(msgbox('Cannot open the file','Sorry','error'));
+%--------------------For grabing video info----------------
+global Videoload vidHeight vidWidth framerate 
+Videoload = strcat(video_path,video_name);
+handles =guidata(hObject);
+videoObject = VideoReader(Videoload);
+vidHeight = videoObject.Height;
+vidWidth = videoObject.Width;
+framerate = videoObject.FrameRate;
+duration = sec2hms(videoObject.Duration);
+formatVideoData = ['Files:%s\n' ...
+    'Resolustions:%d X %d \n'...
+    'Framerate:%d\n'...
+    'Total duration:%s\n'];
+strinformation = sprintf(formatVideoData,video_name,vidWidth,vidHeight,framerate,duration);
+set(handles.text2,'String',strinformation);
+    
+mov = struct('cdata', zeros(vidHeight,vidWidth,3,'uint8'),... %Creates empty mov structure
+    'colormap',[]);
+k=1;
+while hasFrame(videoObject)
+    mov(k).cdata = readFrame(videoObject);%Video frames are stored in structure pre buffering
+    k = k+1;
+end
+    handles.mov = mov;
+    handles.videoObject = videoObject;
+    handles.i= 1;
+    guidata(hObject,handles)
+    %-------Load the RGB Values------------%
+handles.mov = mov;
+vidStruct = handles.mov;
+[m,n]=size(vidStruct);
+handles.l = n;
+handles.i= 1;
+Frames = handles.mov;
+handles.len = length(Frames);
+handles.cond = 1;
+
+RGB = uint8(zeros(size(Frames(handles.i).cdata)));
+R = uint8(zeros(size(Frames(handles.i).cdata)));
+G = uint8(zeros(size(Frames(handles.i).cdata)));
+B = uint8(zeros(size(Frames(handles.i).cdata)));
+for j= 1:handles.l
+RGB = Frames(j).cdata;
+R = RGB(:,:,1);
+G = RGB(:,:,2);
+B = RGB(:,:,3);
+
+[yR, x] = imhist(R);
+[yG, x] = imhist(G);
+[yB, x] = imhist(B);
+yRed(:,j) = [yR];
+yGreen(:,j) = [yG];
+yBlue(:,j) = [yB];
+end
+
+
+
+%------Load The music player--------%
+[y, fs] = audioread(Videoload);
+
+p = audioplayer(y, fs);
+
+%-------Handle Variables-------%
+handles.player = p;
+handles.yRed = yRed;
+handles.yGreen = yGreen;
+handles.yBlue = yBlue;
+handles.x = x;
+handles.i= 1;
+handles.mov = mov;
+handles.videoObject = videoObject;
+    
+guidata(hObject,handles)
