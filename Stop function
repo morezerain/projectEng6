@@ -1,0 +1,17 @@
+function Stop_Callback(hObject, eventdata, handles)
+% hObject    handle to Stop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+Play = handles.Play;
+vidStruct = handles.mov;
+Play.Value = 0;
+
+handles.i = 1;
+Axes = handles.axes2;
+image(vidStruct(1).cdata,'Parent',handles.axes2)
+Axes.Visible = 'off';
+handles.i = 1;
+set(handles.Play,'String','Play')
+
+
+guidata(hObject,handles);
